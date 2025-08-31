@@ -1,0 +1,3 @@
+repository "My project (2)/Game 2025-08-31_16-58-12@2474887298900@cloud"
+  path "/"
+    smartbranch "/main"
