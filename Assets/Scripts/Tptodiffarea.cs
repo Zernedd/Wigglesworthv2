@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
@@ -11,7 +11,8 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
     public GameObject player;
     public Rigidbody playerr;
     public Collider col;
-    public string que; // queue / place type
+    public string que; 
+
 
     private bool pendingJoin = false;
     private string nextQueue;
@@ -20,25 +21,34 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
     {
         if (other.gameObject.CompareTag("HandTag"))
         {
-            playerr.isKinematic = true;
+         
+                    
+                    SuperHeroTycoonMan[] allBases = FindObjectsOfType<SuperHeroTycoonMan>();
+
+                    
+                    foreach (SuperHeroTycoonMan baseInstance in allBases)
+                    {
+                        baseInstance.ResetPads();
+                    }
+                    playerr.isKinematic = true;
             player.transform.localPosition = tppoint.transform.localPosition;
 
             nextQueue = que;
 
             if (PhotonNetwork.InRoom)
             {
-                // leave current room first
+                
                 pendingJoin = true;
                 PhotonNetwork.LeaveRoom();
             }
             else if (PhotonNetwork.IsConnectedAndReady)
             {
-                // safe to join immediately
+                
                 JoinQueue(nextQueue);
             }
             else
             {
-                // not connected yet, flag join for later
+                
                 pendingJoin = true;
             }
         }

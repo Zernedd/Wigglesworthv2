@@ -157,8 +157,9 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
         }
     }
 
-    private void ResetPads()
+    public void ResetPads()
     {
+        Debug.Log("hehehiorfhewuohrguew");
         foreach (var pad in pads)
             pad.ResetPad();
     }
@@ -171,4 +172,10 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
             photonView.RPC("RPC_ResetPadObjects", RpcTarget.AllBuffered);
         }
     }
+
+
+
+ 
 }
+
+
