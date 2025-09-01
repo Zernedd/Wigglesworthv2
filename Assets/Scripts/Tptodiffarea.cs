@@ -46,6 +46,7 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
                         baseInstance.ResetPads();
                     }
             player.TeleportTo(tppoint.gameObject.transform.position);
+            player.disableMovement = true;
 
             nextQueue = que;
 
@@ -67,6 +68,10 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
             }
         }
     }
+
+
+
+   
 
     public override void OnLeftRoom()
     {
@@ -108,7 +113,7 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
 
     private void OnTriggerExit(Collider other)
     {
-        playerr.isKinematic = false;
+        player.disableMovement = false;
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
