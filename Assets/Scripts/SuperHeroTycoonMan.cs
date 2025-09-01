@@ -146,28 +146,22 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
         }
     }
 
+
     public void UpdateBalanceText()
     {
+        if (walletText == null) return;
+
         if (ownerId == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            if (walletText != null)
-            {
-                walletText.gameObject.SetActive(true);
-                walletText.text = $"Wallet: {GetPlayerBalance(PhotonNetwork.LocalPlayer.ActorNumber)}";
-            }
-
-            if (bankText != null)
-            {
-                bankText.gameObject.SetActive(true);
-                bankText.text = $"Bank: {GetPlayerBank(PhotonNetwork.LocalPlayer.ActorNumber)}";
-            }
+            walletText.gameObject.SetActive(true);
+            walletText.text = $"Wallet: {GetPlayerBalance(PhotonNetwork.LocalPlayer.ActorNumber)}";
         }
         else
         {
-            if (walletText != null) walletText.gameObject.SetActive(false);
-            if (bankText != null) bankText.gameObject.SetActive(false);
+            walletText.gameObject.SetActive(false);
         }
     }
+
 
     public void TryClaim(int playerId)
     {
@@ -190,9 +184,14 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     public void ResetPads()
     {
         foreach (var pad in pads)
-            pad.ResetPad();
+        {
+            if (pad != null)   
+                pad.ResetPad();
+            else
+                Debug.LogWarning($"Base {baseId} has a null pad reference in the pads array!");
+        }
     }
-    
+
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {

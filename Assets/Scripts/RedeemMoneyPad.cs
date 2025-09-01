@@ -7,19 +7,22 @@ public class RedeemMoneyPad : MonoBehaviour
     [Header("Setup")]
     public SuperHeroTycoonMan parentBase;
     public TMP_Text redeemText;
-    public Collider touchCollider;   
+    public Collider touchCollider;
 
     [Header("Audio")]
     public AudioSource audioSource;
     public AudioClip redeemClip;
     public AudioClip noFundsClip;
 
+    [Header("Settings")]
+    public float redeemCooldown = 1f; 
+
+    private float lastRedeemTime = -999f;
+
     private void Awake()
     {
         if (touchCollider != null)
-        {
             touchCollider.isTrigger = true;
-        }
     }
 
     private void Update()
@@ -29,11 +32,16 @@ public class RedeemMoneyPad : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("HandTag"))  
-        {
-            int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
-            TryRedeem(playerId);
-        }
+        if (!other.CompareTag("HandTag")) return;
+
+       
+        if (Time.time - lastRedeemTime < redeemCooldown)
+            return;
+
+        lastRedeemTime = Time.time;
+
+        int playerId = PhotonNetwork.LocalPlayer.ActorNumber;
+        TryRedeem(playerId);
     }
 
     public void TryRedeem(int playerId)
