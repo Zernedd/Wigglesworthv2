@@ -1,3 +1,4 @@
+using Meta.Voice.Audio.Decoding;
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,9 @@ public class BuyPad : MonoBehaviour
     public GameObject[] objectsToEnable;   // conveyor belts, next pads, etc.
 
     private bool purchased = false;
+    public AudioSource src;
+    public AudioClip bought;
+    public AudioClip notenough;
 
     void Start()
     {
@@ -37,7 +41,7 @@ public class BuyPad : MonoBehaviour
         }
     }
 
-    // Called from the helper when a player steps on the cube
+   
     public void TryPurchase(int localId)
     {
         if (purchased || parentBase.OwnerId != localId) return;
@@ -46,21 +50,22 @@ public class BuyPad : MonoBehaviour
         if (balance >= price)
         {
             SuperHeroTycoonMan.AddCurrency(localId, -price);
+            src.PlayOneShot(bought);
             purchased = true;
             Debug.Log($"Player {localId} purchased pad for {price}");
 
-            // Start income coroutine
+            
             StartCoroutine(GenerateIncome(localId));
 
-            // Disable the cube visually
+          
             if (cubeWithCollider != null)
                 cubeWithCollider.SetActive(false);
 
-            // Enable assigned objects locally
+           
             foreach (var obj in objectsToEnable)
                 if (obj != null) obj.SetActive(true);
 
-            // RPC to enable objects on other clients
+            
             int[] viewIDs = new int[objectsToEnable.Length];
             for (int i = 0; i < objectsToEnable.Length; i++)
             {
@@ -76,6 +81,7 @@ public class BuyPad : MonoBehaviour
         }
         else
         {
+            src.PlayOneShot(notenough);
             Debug.Log($"Player {localId} cannot afford pad. Balance: {balance}, Price: {price}");
         }
     }
