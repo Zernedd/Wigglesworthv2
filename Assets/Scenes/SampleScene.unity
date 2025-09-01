@@ -3794,7 +3794,9 @@ MonoBehaviour:
   balanceText: {fileID: 955380935}
   claimCube: {fileID: 1658694769}
   requiredRoomProp: Hero_Tycoon
-  pads: []
+  pads:
+  - {fileID: 1835053591}
+  - {fileID: 1147518829}
 --- !u!114 &753094193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12429,7 +12431,9 @@ MonoBehaviour:
   balanceText: {fileID: 1031141315}
   claimCube: {fileID: 705897294}
   requiredRoomProp: Hero_Tycoon
-  pads: []
+  pads:
+  - {fileID: 1418141899}
+  - {fileID: 1852399301}
 --- !u!114 &1711505783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13491,10 +13495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 670ba2b185610ee498a64e3dd94d49ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customProperties:
-  - key: Hub
-    value: _Hub
-  roomname: 
+  nameofit: Hub
 --- !u!65 &1935535906
 BoxCollider:
   m_ObjectHideFlags: 0

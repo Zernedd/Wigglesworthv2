@@ -8,7 +8,7 @@ using ExitGames.Client.Photon; // for Hashtable
 public class Tptodiffarea : MonoBehaviourPunCallbacks
 {
     public GameObject tppoint;
-    public GameObject player;
+    public GorillaLocomotion.Player player;
     public Rigidbody playerr;
     public Collider col;
     public string que; 
@@ -16,6 +16,21 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
 
     private bool pendingJoin = false;
     private string nextQueue;
+
+
+    private void Awake()
+    {
+        if (!player)
+            player = FindObjectOfType<GorillaLocomotion.Player>();
+
+        if (!playerr && player)
+            playerr = player.GetComponent<Rigidbody>();
+
+        if (!col && player)
+            col = player.GetComponent<Collider>();
+    }
+    
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -30,14 +45,13 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
                     {
                         baseInstance.ResetPads();
                     }
-                    playerr.isKinematic = true;
-            player.transform.localPosition = tppoint.transform.localPosition;
+            player.TeleportTo(tppoint.gameObject.transform.position);
 
             nextQueue = que;
 
             if (PhotonNetwork.InRoom)
             {
-                
+                // leave current room first
                 pendingJoin = true;
                 PhotonNetwork.LeaveRoom();
             }
@@ -48,7 +62,7 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
             }
             else
             {
-                
+                // not connected yet, flag join for later
                 pendingJoin = true;
             }
         }

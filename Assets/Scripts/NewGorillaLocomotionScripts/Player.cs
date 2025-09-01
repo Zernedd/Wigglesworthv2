@@ -363,6 +363,25 @@
             }
         }
 
+
+        public void TeleportTo(Vector3 targetPosition)
+        {
+      
+            transform.position = targetPosition;
+
+            
+            if (playerRigidBody != null)
+            {
+                playerRigidBody.velocity = Vector3.zero;
+            }
+
+        
+            lastHeadPosition = headCollider.transform.position;
+            lastLeftHandPosition = CurrentLeftHandPosition();
+            lastRightHandPosition = CurrentRightHandPosition();
+        }
+
+
         private void StoreVelocities()
         {
             velocityIndex = (velocityIndex + 1) % velocityHistorySize;

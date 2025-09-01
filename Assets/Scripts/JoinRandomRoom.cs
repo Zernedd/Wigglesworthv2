@@ -5,19 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class JoinRandomRoom : MonoBehaviour
+public class JoinRandomRoom : MonoBehaviourPunCallbacks
 {
+    public string nameofit;
 
-    
-    [System.Serializable]
-    public class properties
-    {
-        public string key;
-        public string value;
-    }
-    public List<properties> customProperties;
-    public string roomname;
-    private RoomOptions roomcustomprops;
     // Start is called before the first frame update
     void Start()
     {
@@ -30,12 +21,38 @@ public class JoinRandomRoom : MonoBehaviour
         
     }
 
+    private void JoinQueue(string queueName)
+    {
+        Debug.Log($"Attempting to join queue: {queueName}");
 
+        ExitGames.Client.Photon.Hashtable expectedProps = new ExitGames.Client.Photon.Hashtable() { { "type", queueName } };
+        bool joinStarted = PhotonNetwork.JoinRandomRoom(expectedProps, 0);
+
+        if (!joinStarted)
+        {
+            // If no room exists or all are full, create a new one
+            RoomOptions options = new RoomOptions();
+            options.MaxPlayers = 10;
+            options.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "type", queueName } };
+            options.CustomRoomPropertiesForLobby = new string[] { "type" };
+            PhotonNetwork.CreateRoom(null, options);
+        }
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        Debug.LogWarning($"JoinRandomRoom failed: {message}. Creating a new room.");
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 10;
+        options.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable() { { "type", nameofit } };
+        options.CustomRoomPropertiesForLobby = new string[] { "type" };
+        PhotonNetwork.CreateRoom(null, options);
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("HandTag"))
         {
-            PhotonVRManager.JoinRandomRoom("hub", 10);
+          JoinQueue(nameofit);
         }
         }
     }
