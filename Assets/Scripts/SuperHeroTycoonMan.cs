@@ -1,8 +1,8 @@
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using System.Collections.Generic;
 
 public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 {
@@ -56,6 +56,25 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     public void RPC_ClaimBase(int newOwnerId)
     {
         SetOwner(newOwnerId);
+
+       
+        ResetPads();
+    }
+
+    [PunRPC]
+    public void RPC_EnablePadObjects(int padIndex)
+    {
+        if (padIndex < 0 || padIndex >= pads.Length) return;
+        pads[padIndex].EnableObjectsLocally();
+    }
+
+    [PunRPC]
+    public void RPC_ResetPadObjects()
+    {
+        foreach (var pad in pads)
+        {
+            pad.ResetPad();
+        }
     }
 
     private void SetOwner(int newOwnerId)
@@ -85,7 +104,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     {
         if (!playerBalances.ContainsKey(playerId))
             playerBalances[playerId] = 0;
-
         return playerBalances[playerId];
     }
 
@@ -93,7 +111,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     {
         if (!playerBalances.ContainsKey(playerId))
             playerBalances[playerId] = 0;
-
         playerBalances[playerId] += amount;
 
         if (playerId == PhotonNetwork.LocalPlayer.ActorNumber)
@@ -122,14 +139,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
-    public void RPC_EnablePadObjects(int padIndex)
-    {
-        if (padIndex < 0 || padIndex >= pads.Length) return;
-
-        pads[padIndex].EnableObjectsLocally();
-    }
-
     public void TryClaim(int playerId)
     {
         var allBases = GameObject.FindObjectsOfType<SuperHeroTycoonMan>();
@@ -148,15 +157,18 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
         }
     }
 
+    private void ResetPads()
+    {
+        foreach (var pad in pads)
+            pad.ResetPad();
+    }
+
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         if (otherPlayer.ActorNumber == ownerId)
         {
             photonView.RPC("RPC_ClaimBase", RpcTarget.AllBuffered, -1);
-
-            // Reset all pads
-            foreach (var pad in pads)
-                pad.ResetPad();
+            photonView.RPC("RPC_ResetPadObjects", RpcTarget.AllBuffered);
         }
     }
 }
