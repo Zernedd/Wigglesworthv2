@@ -8,24 +8,25 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 {
     [Header("Setup")]
     public int baseId;
-    public TextMeshPro statusText;       
-    public TextMeshPro balanceText;      
+    public TextMeshPro statusText;
+    public TextMeshPro balanceText;
     public GameObject claimCube;
-
-    private int ownerId = -1;
-    private Renderer rend;
 
     [Header("Room Check")]
     public string requiredRoomProp = "Hero_Tycoon";
 
-    
+    [Header("Pads")]
+    public BuyPad[] pads;
+
+    private int ownerId = -1;
+    private Renderer rend;
+
     private static Dictionary<int, int> playerBalances = new Dictionary<int, int>();
 
     void Start()
     {
         int localId = PhotonNetwork.LocalPlayer.ActorNumber;
 
-        
         if (!playerBalances.ContainsKey(localId))
             playerBalances[localId] = 500;
 
@@ -48,7 +49,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
             trigger.parentBase = this;
         }
 
-      
         UpdateBalanceText();
     }
 
@@ -69,7 +69,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
             else rend.material.color = Color.red;
         }
 
-        
         if (statusText != null)
         {
             if (ownerId == -1) statusText.text = "Unclaimed";
@@ -77,13 +76,10 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
             else statusText.text = "Claimed";
         }
 
-        
         UpdateBalanceText();
     }
 
     public int OwnerId => ownerId;
-
-    
 
     public static int GetPlayerBalance(int playerId)
     {
@@ -100,7 +96,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 
         playerBalances[playerId] += amount;
 
-     
         if (playerId == PhotonNetwork.LocalPlayer.ActorNumber)
         {
             var allBases = GameObject.FindObjectsOfType<SuperHeroTycoonMan>();
@@ -128,29 +123,25 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void RPC_EnableObjects(int[] viewIDs)
+    public void RPC_EnablePadObjects(int padIndex)
     {
-        foreach (var id in viewIDs)
-        {
-            PhotonView pv = PhotonView.Find(id);
-            if (pv != null)
-                pv.gameObject.SetActive(true);
-        }
+        if (padIndex < 0 || padIndex >= pads.Length) return;
+
+        pads[padIndex].EnableObjectsLocally();
     }
+
     public void TryClaim(int playerId)
     {
-        
         var allBases = GameObject.FindObjectsOfType<SuperHeroTycoonMan>();
         foreach (var b in allBases)
         {
             if (b.OwnerId == playerId)
             {
                 Debug.Log($"Player {playerId} already owns base {b.baseId}!");
-                return; 
+                return;
             }
         }
 
-        // If no other base owned, claim this one
         if (ownerId == -1)
         {
             photonView.RPC("RPC_ClaimBase", RpcTarget.AllBuffered, playerId);
@@ -160,6 +151,12 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         if (otherPlayer.ActorNumber == ownerId)
+        {
             photonView.RPC("RPC_ClaimBase", RpcTarget.AllBuffered, -1);
+
+            // Reset all pads
+            foreach (var pad in pads)
+                pad.ResetPad();
+        }
     }
 }
