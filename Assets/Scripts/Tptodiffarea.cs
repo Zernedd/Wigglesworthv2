@@ -6,7 +6,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.Animations.Rigging;
 
-public class Tptodiffarea : MonoBehaviour
+public class Tptodiffarea : MonoBehaviourPunCallbacks
+
 {
 
   // public Collider col;
@@ -22,7 +23,8 @@ public class Tptodiffarea : MonoBehaviour
         public string value; 
     }
     public List<properties> customProperties;
-
+    public string roomname;
+    private RoomOptions roomcustomprops;
     // Start is called before the first frame update
     void Start()
     {
@@ -52,21 +54,32 @@ public class Tptodiffarea : MonoBehaviour
                 roomProps[prop.key] = prop.value;
             }
 
-            RoomOptions options = new RoomOptions();
-            options.CustomRoomProperties = roomProps;
+            roomcustomprops = new RoomOptions();
+            roomcustomprops.CustomRoomProperties = roomProps;
 
-            options.CustomRoomPropertiesForLobby = new string[customProperties.Count];
+            roomcustomprops.CustomRoomPropertiesForLobby = new string[customProperties.Count];
             for (int i = 0; i < customProperties.Count; i++)
             {
-                options.CustomRoomPropertiesForLobby[i] = customProperties[i].key;
+                roomcustomprops.CustomRoomPropertiesForLobby[i] = customProperties[i].key;
             }
 
-            string roomName = Random.Range(0, 9999999999999).ToString();
-            PhotonNetwork.JoinOrCreateRoom(roomName, options, TypedLobby.Default);
+            roomname = Random.Range(0, 9999999999999).ToString();
+            if (PhotonNetwork.InRoom)
+            {
+                PhotonNetwork.LeaveRoom();
+            }
+            else
+            {
+                PhotonNetwork.JoinOrCreateRoom(roomname, roomcustomprops, TypedLobby.Default);
+            }
         }
     }
 
-    
+    public override void OnLeftRoom()
+    {
+      
+        PhotonNetwork.JoinOrCreateRoom(roomname, roomcustomprops, TypedLobby.Default);
+    }
 
 
     private void OnTriggerExit(Collider other)
