@@ -71,7 +71,8 @@ public class BuyPad : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(1f);
-            SuperHeroTycoonMan.AddCurrency(playerId, incomePerSecond);
+            SuperHeroTycoonMan.AddToBank(playerId, incomePerSecond);
+            parentBase.UpdateBalanceText();
         }
     }
 

@@ -18,10 +18,17 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     [Header("Pads")]
     public BuyPad[] pads;
 
+
+
+    [Header("Balance UI")]
+    public TextMeshPro walletText;
+    public TextMeshPro bankText;
+
     private int ownerId = -1;
     private Renderer rend;
 
     private static Dictionary<int, int> playerBalances = new Dictionary<int, int>();
+    private static Dictionary<int, int> playerBanks = new Dictionary<int, int>();
 
     void Start()
     {
@@ -29,6 +36,9 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 
         if (!playerBalances.ContainsKey(localId))
             playerBalances[localId] = 500;
+
+        if (!playerBanks.ContainsKey(localId))
+            playerBanks[localId] = 0;
 
         if (PhotonNetwork.CurrentRoom == null ||
             !PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(requiredRoomProp))
@@ -56,8 +66,6 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     public void RPC_ClaimBase(int newOwnerId)
     {
         SetOwner(newOwnerId);
-
-       
         ResetPads();
     }
 
@@ -72,9 +80,7 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     public void RPC_ResetPadObjects()
     {
         foreach (var pad in pads)
-        {
             pad.ResetPad();
-        }
     }
 
     private void SetOwner(int newOwnerId)
@@ -100,6 +106,7 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 
     public int OwnerId => ownerId;
 
+ 
     public static int GetPlayerBalance(int playerId)
     {
         if (!playerBalances.ContainsKey(playerId))
@@ -112,30 +119,53 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
         if (!playerBalances.ContainsKey(playerId))
             playerBalances[playerId] = 0;
         playerBalances[playerId] += amount;
+    }
 
-        if (playerId == PhotonNetwork.LocalPlayer.ActorNumber)
+ 
+    public static int GetPlayerBank(int playerId)
+    {
+        if (!playerBanks.ContainsKey(playerId))
+            playerBanks[playerId] = 0;
+        return playerBanks[playerId];
+    }
+
+    public static void AddToBank(int playerId, int amount)
+    {
+        if (!playerBanks.ContainsKey(playerId))
+            playerBanks[playerId] = 0;
+        playerBanks[playerId] += amount;
+    }
+
+    public static void RedeemBank(int playerId)
+    {
+        int banked = GetPlayerBank(playerId);
+        if (banked > 0)
         {
-            var allBases = GameObject.FindObjectsOfType<SuperHeroTycoonMan>();
-            foreach (var baseScript in allBases)
-            {
-                if (baseScript.OwnerId == playerId)
-                    baseScript.UpdateBalanceText();
-            }
+            AddCurrency(playerId, banked);
+            playerBanks[playerId] = 0;
         }
     }
 
     public void UpdateBalanceText()
     {
-        if (balanceText == null) return;
-
         if (ownerId == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            balanceText.gameObject.SetActive(true);
-            balanceText.text = $"Balance: {GetPlayerBalance(PhotonNetwork.LocalPlayer.ActorNumber)}";
+            if (walletText != null)
+            {
+                walletText.gameObject.SetActive(true);
+                walletText.text = $"Wallet: {GetPlayerBalance(PhotonNetwork.LocalPlayer.ActorNumber)}";
+            }
+
+            if (bankText != null)
+            {
+                bankText.gameObject.SetActive(true);
+                bankText.text = $"Bank: {GetPlayerBank(PhotonNetwork.LocalPlayer.ActorNumber)}";
+            }
         }
         else
         {
-            balanceText.gameObject.SetActive(false);
+            if (walletText != null) walletText.gameObject.SetActive(false);
+            if (bankText != null) bankText.gameObject.SetActive(false);
         }
     }
 
@@ -159,10 +189,10 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 
     public void ResetPads()
     {
-        Debug.Log("hehehiorfhewuohrguew");
         foreach (var pad in pads)
             pad.ResetPad();
     }
+    
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
@@ -172,10 +202,4 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
             photonView.RPC("RPC_ResetPadObjects", RpcTarget.AllBuffered);
         }
     }
-
-
-
- 
 }
-
-
