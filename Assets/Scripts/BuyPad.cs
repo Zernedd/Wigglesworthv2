@@ -17,10 +17,12 @@ public class BuyPad : MonoBehaviour
     [Header("Objects to Enable After Purchase")]
     public GameObject[] objectsToEnable;   // conveyor belts, next pads, etc.
 
-    private bool purchased = false;
+    [Header("Audio")]
     public AudioSource src;
     public AudioClip bought;
-    public AudioClip notenough;
+    public AudioClip notEnough;
+
+    private bool purchased = false;
 
     void Start()
     {
@@ -41,7 +43,6 @@ public class BuyPad : MonoBehaviour
         }
     }
 
-   
     public void TryPurchase(int localId)
     {
         if (purchased || parentBase.OwnerId != localId) return;
@@ -49,23 +50,27 @@ public class BuyPad : MonoBehaviour
         int balance = SuperHeroTycoonMan.GetPlayerBalance(localId);
         if (balance >= price)
         {
+            // Deduct money
             SuperHeroTycoonMan.AddCurrency(localId, -price);
-            src.PlayOneShot(bought);
+
+            // Play purchase sound
+            if (src != null && bought != null) src.PlayOneShot(bought);
+
             purchased = true;
             Debug.Log($"Player {localId} purchased pad for {price}");
 
-            
+            // Start generating income
             StartCoroutine(GenerateIncome(localId));
 
-          
+            // Disable the buy cube
             if (cubeWithCollider != null)
                 cubeWithCollider.SetActive(false);
 
-           
+            // Enable linked objects locally
             foreach (var obj in objectsToEnable)
                 if (obj != null) obj.SetActive(true);
 
-            
+            // Send enable info to other clients
             int[] viewIDs = new int[objectsToEnable.Length];
             for (int i = 0; i < objectsToEnable.Length; i++)
             {
@@ -81,7 +86,9 @@ public class BuyPad : MonoBehaviour
         }
         else
         {
-            src.PlayOneShot(notenough);
+            // Play "not enough money" sound
+            if (src != null && notEnough != null) src.PlayOneShot(notEnough);
+
             Debug.Log($"Player {localId} cannot afford pad. Balance: {balance}, Price: {price}");
         }
     }
@@ -95,5 +102,3 @@ public class BuyPad : MonoBehaviour
         }
     }
 }
-
-
