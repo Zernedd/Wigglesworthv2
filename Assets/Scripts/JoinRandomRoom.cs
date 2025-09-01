@@ -1,5 +1,6 @@
 using Photon.Pun;
 using Photon.Realtime;
+using Photon.VR;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -34,26 +35,7 @@ public class JoinRandomRoom : MonoBehaviour
     {
         if (other.gameObject.CompareTag("HandTag"))
         {
-            ExitGames.Client.Photon.Hashtable roomProps = new ExitGames.Client.Photon.Hashtable();
-            foreach (var prop in customProperties)
-            {
-                roomProps[prop.key] = prop.value;
-            }
-
-            roomcustomprops = new RoomOptions();
-            roomcustomprops.CustomRoomProperties = roomProps;
-
-            roomcustomprops.CustomRoomPropertiesForLobby = new string[customProperties.Count];
-            for (int i = 0; i < customProperties.Count; i++)
-            {
-                roomcustomprops.CustomRoomPropertiesForLobby[i] = customProperties[i].key;
-            }
-
-            roomname = Random.Range(0, 9999999999999).ToString();
-
-
-
-            PhotonNetwork.JoinOrCreateRoom(roomname, roomcustomprops, TypedLobby.Default);
+            PhotonVRManager.JoinRandomRoom("hub", 10);
         }
         }
     }

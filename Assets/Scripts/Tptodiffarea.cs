@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using Photon.VR;
 
 public class Tptodiffarea : MonoBehaviourPunCallbacks
 {
@@ -28,42 +29,14 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
     {
         if (other.gameObject.CompareTag("HandTag"))
         {
-            playerr.isKinematic = true;
-            player.transform.localPosition = tppoint.transform.localPosition;
-
-            ExitGames.Client.Photon.Hashtable roomProps = new ExitGames.Client.Photon.Hashtable();
-            foreach (var prop in customProperties)
-            {
-                roomProps[prop.key] = prop.value;
-            }
-
-            roomcustomprops = new RoomOptions();
-            roomcustomprops.CustomRoomProperties = roomProps;
-            roomcustomprops.CustomRoomPropertiesForLobby = new string[customProperties.Count];
-            for (int i = 0; i < customProperties.Count; i++)
-            {
-                roomcustomprops.CustomRoomPropertiesForLobby[i] = customProperties[i].key;
-            }
-
-            roomname = Random.Range(0, 999999999).ToString();
-
-            if (PhotonNetwork.InRoom)
-            {
-                // leave first, then wait for OnConnectedToMaster
-                pendingJoin = true;
-                PhotonNetwork.LeaveRoom();
-            }
-            else
-            {
-                PhotonNetwork.JoinOrCreateRoom(roomname, roomcustomprops, TypedLobby.Default);
-            }
+            PhotonVRManager.JoinRandomRoom("tycoon1", 10);
         }
     }
 
     public override void OnLeftRoom()
     {
         Debug.Log("Left current room, waiting to return to Master...");
-        // Do nothing here except wait for OnConnectedToMaster
+       
     }
 
     public override void OnConnectedToMaster()
@@ -72,7 +45,7 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
         if (pendingJoin)
         {
             pendingJoin = false;
-            PhotonNetwork.JoinOrCreateRoom(roomname, roomcustomprops, TypedLobby.Default);
+            PhotonVRManager.JoinRandomRoom("tycoon1", 10);
         }
     }
 
