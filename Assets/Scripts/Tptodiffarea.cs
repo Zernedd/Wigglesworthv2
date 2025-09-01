@@ -3,6 +3,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using Photon.VR;
+using ExitGames.Client.Photon; // for Hashtable
 
 public class Tptodiffarea : MonoBehaviourPunCallbacks
 {
@@ -10,33 +11,47 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
     public GameObject player;
     public Rigidbody playerr;
     public Collider col;
+    public string que; // queue / place type
 
-    [System.Serializable]
-    public class properties
-    {
-        public string key;
-        public string value;
-    }
-
-    public List<properties> customProperties;
-    public string roomname;
-    private RoomOptions roomcustomprops;
-
-    // Track if we want to join after leaving
     private bool pendingJoin = false;
+    private string nextQueue;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("HandTag"))
         {
-            PhotonVRManager.JoinRandomRoom("tycoon1", 10);
+            playerr.isKinematic = true;
+            player.transform.localPosition = tppoint.transform.localPosition;
+
+            nextQueue = que;
+
+            if (PhotonNetwork.InRoom)
+            {
+                // leave current room first
+                pendingJoin = true;
+                PhotonNetwork.LeaveRoom();
+            }
+            else if (PhotonNetwork.IsConnectedAndReady)
+            {
+                // safe to join immediately
+                JoinQueue(nextQueue);
+            }
+            else
+            {
+                // not connected yet, flag join for later
+                pendingJoin = true;
+            }
         }
     }
 
     public override void OnLeftRoom()
     {
         Debug.Log("Left current room, waiting to return to Master...");
-       
+        // Do NOT call JoinQueue here; just wait for OnConnectedToMaster
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonVRManager.Connect();
+        }
     }
 
     public override void OnConnectedToMaster()
@@ -45,12 +60,40 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
         if (pendingJoin)
         {
             pendingJoin = false;
-            PhotonVRManager.JoinRandomRoom("tycoon1", 10);
+            JoinQueue(nextQueue); // safe to join now
+        }
+    }
+
+    private void JoinQueue(string queueName)
+    {
+        Debug.Log($"Attempting to join queue: {queueName}");
+
+        Hashtable expectedProps = new Hashtable() { { "type", queueName } };
+        bool joinStarted = PhotonNetwork.JoinRandomRoom(expectedProps, 0);
+
+        if (!joinStarted)
+        {
+            // If no room exists or all are full, create a new one
+            RoomOptions options = new RoomOptions();
+            options.MaxPlayers = 10;
+            options.CustomRoomProperties = new Hashtable() { { "type", queueName } };
+            options.CustomRoomPropertiesForLobby = new string[] { "type" };
+            PhotonNetwork.CreateRoom(null, options);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         playerr.isKinematic = false;
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        Debug.LogWarning($"JoinRandomRoom failed: {message}. Creating a new room.");
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 10;
+        options.CustomRoomProperties = new Hashtable() { { "type", nextQueue } };
+        options.CustomRoomPropertiesForLobby = new string[] { "type" };
+        PhotonNetwork.CreateRoom(null, options);
     }
 }

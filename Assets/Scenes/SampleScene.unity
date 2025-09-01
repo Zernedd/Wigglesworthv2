@@ -1585,11 +1585,8 @@ MonoBehaviour:
   tppoint: {fileID: 887173736}
   player: {fileID: 2092075173}
   playerr: {fileID: 2092075174}
-  col: {fileID: 0}
-  customProperties:
-  - key: Hero_Tycoon
-    value: _Hero_Tycoon
-  roomname: 
+  col: {fileID: 335563313}
+  que: tycoon1
 --- !u!65 &335563313
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1843,7 +1840,7 @@ GameObject:
   - component: {fileID: 370851518}
   - component: {fileID: 370851519}
   m_Layer: 0
-  m_Name: convaorbelt
+  m_Name: convaorbelt2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3792,11 +3789,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3011ecb7e0fa6d64d86d98e4783c2568, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseId: 1
+  baseId: 0
   statusText: {fileID: 600346234}
   balanceText: {fileID: 955380935}
   claimCube: {fileID: 1658694769}
   requiredRoomProp: Hero_Tycoon
+  pads: []
 --- !u!114 &753094193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6247,7 +6245,7 @@ GameObject:
   - component: {fileID: 1147518828}
   - component: {fileID: 1147518829}
   m_Layer: 0
-  m_Name: Wall pad
+  m_Name: Wall pad2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6282,14 +6280,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentBase: {fileID: 753094192}
-  price: 1000
+  price: 0
   incomePerSecond: 0
-  cubeWithCollider: {fileID: 705950401}
   objectsToEnable:
   - {fileID: 1754693045}
-  src: {fileID: 418207272}
-  bought: {fileID: 8300000, guid: a8259c7131cccc2449e75ba9fd1c8f23, type: 3}
-  notenough: {fileID: 8300000, guid: 41a73c1b6f3671547ae5c22d635da205, type: 3}
+  cubeWithCollider: {fileID: 705950401}
+  audioSource: {fileID: 0}
+  boughtClip: {fileID: 0}
+  notEnoughClip: {fileID: 0}
 --- !u!1 &1180465816
 GameObject:
   m_ObjectHideFlags: 0
@@ -7285,13 +7283,13 @@ MonoBehaviour:
   parentBase: {fileID: 1711505782}
   price: 0
   incomePerSecond: 5
-  cubeWithCollider: {fileID: 1334455964}
   objectsToEnable:
   - {fileID: 895678297}
   - {fileID: 1852399299}
-  src: {fileID: 0}
-  bought: {fileID: 0}
-  notenough: {fileID: 0}
+  cubeWithCollider: {fileID: 1334455964}
+  audioSource: {fileID: 0}
+  boughtClip: {fileID: 0}
+  notEnoughClip: {fileID: 0}
 --- !u!1 &1438465503
 GameObject:
   m_ObjectHideFlags: 0
@@ -9648,7 +9646,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1804698656}
-  m_VersionIndex: 2939
+  m_VersionIndex: 2945
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -12426,11 +12424,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3011ecb7e0fa6d64d86d98e4783c2568, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseId: 0
+  baseId: 1
   statusText: {fileID: 1904304743}
   balanceText: {fileID: 1031141315}
   claimCube: {fileID: 705897294}
   requiredRoomProp: Hero_Tycoon
+  pads: []
 --- !u!114 &1711505783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13228,13 +13227,13 @@ MonoBehaviour:
   parentBase: {fileID: 753094192}
   price: 0
   incomePerSecond: 5
-  cubeWithCollider: {fileID: 1438465503}
   objectsToEnable:
   - {fileID: 370851517}
   - {fileID: 1147518827}
-  src: {fileID: 418207272}
-  bought: {fileID: 8300000, guid: a8259c7131cccc2449e75ba9fd1c8f23, type: 3}
-  notenough: {fileID: 8300000, guid: 41a73c1b6f3671547ae5c22d635da205, type: 3}
+  cubeWithCollider: {fileID: 1438465503}
+  audioSource: {fileID: 0}
+  boughtClip: {fileID: 0}
+  notEnoughClip: {fileID: 0}
 --- !u!1 &1852399299
 GameObject:
   m_ObjectHideFlags: 0
@@ -13281,14 +13280,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentBase: {fileID: 1711505782}
-  price: 1000
+  price: 0
   incomePerSecond: 0
-  cubeWithCollider: {fileID: 1364837840}
   objectsToEnable:
   - {fileID: 91373694}
-  src: {fileID: 0}
-  bought: {fileID: 0}
-  notenough: {fileID: 0}
+  cubeWithCollider: {fileID: 1364837840}
+  audioSource: {fileID: 0}
+  boughtClip: {fileID: 0}
+  notEnoughClip: {fileID: 0}
 --- !u!1 &1904304742
 GameObject:
   m_ObjectHideFlags: 0
