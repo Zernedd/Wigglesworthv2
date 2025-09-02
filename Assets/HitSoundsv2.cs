@@ -5,16 +5,19 @@ using UnityEngine.XR;
 
 public class HitSoundsv2 : MonoBehaviour
 {
+   // [Header("Tag-specific sounds")]
     public AudioClip[] water, stone, tree, grass, metal, glass, snow, dirt, carpet, wood;
+
+    [Header("Fall Back Sounds")]
+    public AudioClip[] defaultSounds;
+
     public AudioSource audioSource;
     public bool LeftController;
     private float hapticWaitSeconds = 0.05f;
     Dictionary<string, AudioClip[]> audio;
-    
-    void Start() {
 
-       // Debug.Log(Microphone.devices.Length);
-       // Microphone.Start(Microphone.devices.Length.ToString(), false, 0 , 0);
+    void Start()
+    {
         audio = new Dictionary<string, AudioClip[]> {
             { "Water", water },
             { "Stone", stone },
@@ -31,8 +34,20 @@ public class HitSoundsv2 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("hit sum with tag: " + other.tag);
-        PlayRandomSound(audio[other.gameObject.tag], audioSource);
+       // Debug.Log("Hit object with tag: " + other.tag);
+
+      
+        AudioClip[] chosenClips;
+        if (!audio.TryGetValue(other.gameObject.tag, out chosenClips) || chosenClips.Length == 0)
+        {
+            chosenClips = defaultSounds;
+        }
+
+        if (chosenClips != null && chosenClips.Length > 0)
+        {
+            PlayRandomSound(chosenClips, audioSource);
+        }
+
         StartVibration(LeftController, 0.15f, 0.15f);
     }
 
@@ -51,7 +66,10 @@ public class HitSoundsv2 : MonoBehaviour
     {
         float startTime = Time.time;
         uint channel = 0u;
-        InputDevice device = ((!forLeftController) ? InputDevices.GetDeviceAtXRNode(XRNode.RightHand) : InputDevices.GetDeviceAtXRNode(XRNode.LeftHand));
+        InputDevice device = forLeftController
+            ? InputDevices.GetDeviceAtXRNode(XRNode.LeftHand)
+            : InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
         while (Time.time < startTime + duration)
         {
             device.SendHapticImpulse(channel, amplitude, hapticWaitSeconds);
