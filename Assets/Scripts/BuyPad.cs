@@ -11,6 +11,7 @@ public class BuyPad : MonoBehaviour
     [Header("Objects to Enable")]
     public GameObject[] objectsToEnable;
 
+
     [Header("Trigger Collider")]
     public GameObject cubeWithCollider;
 
@@ -53,7 +54,6 @@ public class BuyPad : MonoBehaviour
                 cubeWithCollider.SetActive(false);
 
             EnableObjectsLocally();
-
             int padIndex = System.Array.IndexOf(parentBase.pads, this);
             parentBase.photonView.RPC("RPC_EnablePadObjects", RpcTarget.OthersBuffered, padIndex);
         }
@@ -81,6 +81,7 @@ public class BuyPad : MonoBehaviour
         foreach (var obj in objectsToEnable)
             if (obj != null) obj.SetActive(true);
     }
+
 
     public void ResetPad()
     {
