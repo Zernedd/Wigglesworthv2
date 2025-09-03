@@ -38,13 +38,13 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
         {
          
                     
-                    SuperHeroTycoonMan[] allBases = FindObjectsOfType<SuperHeroTycoonMan>();
+           SuperHeroTycoonMan[] allBases = FindObjectsOfType<SuperHeroTycoonMan>();
 
                     
-                    foreach (SuperHeroTycoonMan baseInstance in allBases)
-                    {
-                        baseInstance.ResetPads();
-                    }
+           foreach (SuperHeroTycoonMan baseInstance in allBases)
+           {
+               baseInstance.ResetPads();
+           }
             player.TeleportTo(tppoint.gameObject.transform.position);
             player.disableMovement = true;
 
@@ -58,7 +58,16 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
             }
             else if (PhotonNetwork.IsConnectedAndReady)
             {
-                
+                if (que == "pvp")
+                {
+                    GameObject gorillaRig = GameObject.Find("Gorilla Rig");
+                    Transform child = gorillaRig.transform.Find("Gorilla Player");
+                    if (child != null)
+                    {
+                        child.gameObject.AddComponent<PlayerKnockback>();
+                    }
+
+                }
                 JoinQueue(nextQueue);
             }
             else
