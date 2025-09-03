@@ -60,13 +60,18 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
             {
                 if (que == "pvp")
                 {
-                    GameObject gorillaRig = GameObject.Find("Gorilla Rig");
-                    Transform child = gorillaRig.transform.Find("Gorilla Player");
-                    if (child != null)
+                    GameObject player = GameObject.FindWithTag("User");
+                    if (player != null)
                     {
-                        child.gameObject.AddComponent<PlayerKnockback>();
+                        player.gameObject.AddComponent<PlayerKnockback>();
                     }
+                    GameObject rpg = GameObject.FindWithTag("RPG");
+                    if (rpg != null)
+                    {
+                        rpg.gameObject.SetActive(true);
 
+
+                    }
                 }
                 JoinQueue(nextQueue);
             }
