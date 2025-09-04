@@ -96,13 +96,37 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
 
         if (statusText != null)
         {
-            if (ownerId == -1) statusText.text = "Unclaimed";
-            else if (ownerId == PhotonNetwork.LocalPlayer.ActorNumber) statusText.text = "Your Base!";
-            else statusText.text = "Claimed";
+            if (ownerId == -1)
+            {
+                statusText.text = "Unclaimed";
+            }
+            else if (ownerId == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                statusText.text = $"{PhotonNetwork.LocalPlayer.NickName}'s Base";
+            }
+            else
+            {
+              
+                Player ownerPlayer = null;
+                foreach (var p in PhotonNetwork.PlayerList)
+                {
+                    if (p.ActorNumber == ownerId)
+                    {
+                        ownerPlayer = p;
+                        break;
+                    }
+                }
+
+                if (ownerPlayer != null)
+                    statusText.text = $"{ownerPlayer.NickName}'s Base";
+                else
+                    statusText.text = "Claimed By Someone Who Doesnt Exist...?!?"; 
+            }
         }
 
         UpdateBalanceText();
     }
+
 
     public int OwnerId => ownerId;
 
