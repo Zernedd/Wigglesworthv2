@@ -24,7 +24,7 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
     public TextMeshPro walletText;
     public TextMeshPro bankText;
 
-    private int ownerId = -1;
+    public int ownerId = -1;
     private Renderer rend;
 
     private static Dictionary<int, int> playerBalances = new Dictionary<int, int>();
