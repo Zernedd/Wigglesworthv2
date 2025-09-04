@@ -22,6 +22,8 @@ public class LaserDoor : MonoBehaviour
 
     [Header("Door Collider")]
     public Collider doorCollider;
+    [Header("ReZ Wanted Me To Add This")]
+    public GameObject DefaultSpawnPoint;
 
     private void Awake()
     {
@@ -93,7 +95,8 @@ public class LaserDoor : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[LaserDoor] No base found for local player!");
+            yield return StartCoroutine(FadeToBlackAndTeleport(DefaultSpawnPoint.transform));
+            //Debug.LogWarning("[LaserDoor] No base found for local player!");
         }
     }
 
