@@ -23816,7 +23816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parentBase: {fileID: 1728560564}
   price: 5000
-  incomePerSecond: 0
+  incomePerSecond: 100
   objectsToEnable:
   - {fileID: 1363531480}
   cubeWithCollider: {fileID: 1886431758}
@@ -25585,6 +25585,7 @@ MonoBehaviour:
   pads:
   - {fileID: 1835053591}
   - {fileID: 1732898578}
+  - {fileID: 984233827}
   walletText: {fileID: 0}
   bankText: {fileID: 0}
 --- !u!114 &753094193
@@ -51110,6 +51111,7 @@ MonoBehaviour:
   pads:
   - {fileID: 1812026045}
   - {fileID: 1344358154}
+  - {fileID: 661609574}
   walletText: {fileID: 0}
   bankText: {fileID: 0}
 --- !u!114 &1728560565
@@ -66116,7 +66118,7 @@ Transform:
   m_GameObject: {fileID: 2051962970}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -760.18, y: 37.629, z: -279.1}
+  m_LocalPosition: {x: -755.7, y: 37.629, z: -271.1}
   m_LocalScale: {x: 61.933563, y: 65.247696, z: 108.94279}
   m_ConstrainProportionsScale: 0
   m_Children: []
