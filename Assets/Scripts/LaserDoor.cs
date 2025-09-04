@@ -1,146 +1,95 @@
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using System.Collections;
 
 public class LaserDoor : MonoBehaviour
 {
+    [Header("Player")]
     public GorillaLocomotion.Player player;
 
-    [Header("Damage Effect")]
-    public CanvasGroup damageOverlay;
-    public float damageDuration = 2f;
-
-    [Header("Damage Sound")]
-    public AudioSource damageAudio;
-    public float damageSoundInterval = 1f;
+    [Header("Post Processing")]
+    public Volume postProcessVolume;
+    private ColorAdjustments colorAdjustments;
 
     [Header("Damage Settings")]
-    public float damageCooldown = 3f;
+    public float damageFlashDuration = 0.5f;
+    public AudioSource damageAudio;
 
-    private bool isTakingDamage = false;
-    private float lastDamageTime = 0f;
+    [Header("Respawn Settings")]
+    public float fadeDuration = 0.5f;
 
-    [Header("References")]
-    public Collider doorCollider; // assign externally
+    [Header("Door Collider")]
+    public Collider doorCollider;
 
     private void Awake()
     {
-        if (doorCollider == null)
+      
+        if (doorCollider != null)
+            doorCollider.isTrigger = true;
+
+       
+        if (postProcessVolume != null && postProcessVolume.profile.TryGet<ColorAdjustments>(out var ca))
         {
-            Debug.LogError("[LaserDoor] Door Collider is missing! Assign it externally.");
+            colorAdjustments = ca;
+            colorAdjustments.colorFilter.value = Color.white;
         }
         else
         {
-            doorCollider.isTrigger = true; // initially passable
-        }
-    }
-
-    private void Start()
-    {
-        if (damageOverlay != null)
-            damageOverlay.alpha = 0;
-
-        Debug.Log("[LaserDoor] Initialized for local player.");
-    }
-
-    private void Update()
-    {
-        // Fade out damage overlay after cooldown
-        if (!isTakingDamage && damageOverlay != null && damageOverlay.alpha > 0 &&
-            Time.time - lastDamageTime >= damageCooldown)
-        {
-            damageOverlay.alpha = Mathf.Lerp(damageOverlay.alpha, 0, Time.deltaTime * 5f);
+            Debug.LogError("[LaserDoor] Post Process Volume or ColorAdjustments missing!");
         }
     }
 
     /// <summary>
-    /// Call this externally when the player interacts with a door
+    /// Call this when the player interacts with a door
     /// </summary>
     public void CheckDoor(SuperHeroTycoonMan baseman)
     {
-        if (baseman == null)
-        {
-            Debug.LogWarning("[LaserDoor] CheckDoor called with null baseman!");
-            return;
-        }
+        if (baseman == null) return;
 
-        // Enemy base: block and damage
         if (baseman.ownerId != PhotonNetwork.LocalPlayer.ActorNumber)
         {
+           
             doorCollider.isTrigger = false;
-            Debug.Log($"[LaserDoor] Enemy door detected. Blocking player and applying damage. Base owner ID: {baseman.ownerId}");
-
-            if (!isTakingDamage)
-                StartCoroutine(DamageCoroutine());
+            StartCoroutine(DamageAndRespawn());
         }
         else
         {
-            // Own base: pass through
+            
             doorCollider.isTrigger = true;
-            Debug.Log("[LaserDoor] Own base detected. Door is passable.");
         }
     }
 
-    private IEnumerator DamageCoroutine()
+    /// <summary>
+    /// Flash red and then respawn the player
+    /// </summary>
+    private IEnumerator DamageAndRespawn()
     {
-        isTakingDamage = true;
-        lastDamageTime = Time.time;
+       
+        if (damageAudio != null) damageAudio.Play();
 
         float elapsed = 0f;
-        float soundTimer = 0f;
-
-        while (elapsed < damageDuration)
+        while (elapsed < damageFlashDuration)
         {
             elapsed += Time.deltaTime;
-            lastDamageTime = Time.time;
-
-            if (damageOverlay != null)
-                damageOverlay.alpha = Mathf.Lerp(0, 1, elapsed / damageDuration);
-
-            if (damageAudio != null)
-            {
-                soundTimer += Time.deltaTime;
-                if (soundTimer >= damageSoundInterval)
-                {
-                    damageAudio.Play();
-                    soundTimer = 0f;
-                }
-            }
-
+            if (colorAdjustments != null)
+                colorAdjustments.colorFilter.value = Color.Lerp(Color.white, Color.red, Mathf.PingPong(elapsed * 4f, 1f));
             yield return null;
         }
 
-        RespawnAtMyBase();
+        if (colorAdjustments != null)
+            colorAdjustments.colorFilter.value = Color.white;
 
-        // Fade out overlay
-        elapsed = 0f;
-        while (elapsed < 0.5f)
-        {
-            elapsed += Time.deltaTime;
-            if (damageOverlay != null)
-                damageOverlay.alpha = Mathf.Lerp(1, 0, elapsed / 0.5f);
-            yield return null;
-        }
-
-        isTakingDamage = false;
-        Debug.Log("[LaserDoor] Damage coroutine ended.");
-    }
-
-    private void RespawnAtMyBase()
-    {
+        
         SuperHeroTycoonMan myBase = FindMyBase();
         if (myBase != null)
         {
             Transform respawnPoint = myBase.transform.Find("RespawnPoint");
             if (respawnPoint != null)
-            {
-                player.TeleportTo(respawnPoint.position);
-                Debug.Log($"[LaserDoor] Player respawned at {respawnPoint.position} of their base.");
-            }
+                yield return StartCoroutine(FadeToBlackAndTeleport(respawnPoint));
             else
-            {
                 Debug.LogWarning("[LaserDoor] RespawnPoint not found on your base!");
-            }
         }
         else
         {
@@ -154,10 +103,33 @@ public class LaserDoor : MonoBehaviour
         foreach (var b in allBases)
         {
             if (b.ownerId == PhotonNetwork.LocalPlayer.ActorNumber)
-            {
                 return b;
-            }
         }
         return null;
+    }
+
+    private IEnumerator FadeToBlackAndTeleport(Transform target)
+    {
+        
+        float elapsed = 0f;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            if (colorAdjustments != null)
+                colorAdjustments.colorFilter.value = Color.Lerp(Color.white, Color.black, elapsed / fadeDuration);
+            yield return null;
+        }
+
+        player.TeleportTo(target.position);
+
+      
+        elapsed = 0f;
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            if (colorAdjustments != null)
+                colorAdjustments.colorFilter.value = Color.Lerp(Color.black, Color.white, elapsed / fadeDuration);
+            yield return null;
+        }
     }
 }
