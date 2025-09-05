@@ -15,12 +15,9 @@ public class DisableObjectOnTrigger : MonoBehaviour
     }
 
 
-    private void OnTriggerEnter(Collider other)
+    private void Awake()
     {
-        if (other.gameObject.CompareTag("HandTag"))
-        {
-
-        }
+       ThingIWannaDisable.SetActive(false);
     }
 
     // Update is called once per frame
