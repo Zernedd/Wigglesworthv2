@@ -25,6 +25,12 @@ public class LaserDoor : MonoBehaviour
     [Header("ReZ Wanted Me To Add This")]
     public GameObject DefaultSpawnPoint;
 
+
+    [Header("DoorStuff")]
+    public GameObject Lasers;
+    public bool isActive;
+    public PhotonView View;
+
     private void Awake()
     {
       
@@ -98,6 +104,17 @@ public class LaserDoor : MonoBehaviour
             yield return StartCoroutine(FadeToBlackAndTeleport(DefaultSpawnPoint.transform));
             //Debug.LogWarning("[LaserDoor] No base found for local player!");
         }
+    }
+
+
+
+
+    [PunRPC]
+    public void RPC_ToggleDoor(bool active)
+    {
+        isActive = active;
+        if (Lasers != null) Lasers.SetActive(isActive);
+        if (doorCollider != null) doorCollider.enabled = isActive;
     }
 
     private SuperHeroTycoonMan FindMyBase()

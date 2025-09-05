@@ -34,23 +34,24 @@ public class HitSoundsv2 : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-       // Debug.Log("Hit object with tag: " + other.tag);
+        // Debug.Log("Hit object with tag: " + other.tag);
 
-      
-        AudioClip[] chosenClips;
-        if (!audio.TryGetValue(other.gameObject.tag, out chosenClips) || chosenClips.Length == 0)
+        if (!other.gameObject.CompareTag("Ignore"))
         {
-            chosenClips = defaultSounds;
-        }
+            AudioClip[] chosenClips;
+            if (!audio.TryGetValue(other.gameObject.tag, out chosenClips) || chosenClips.Length == 0)
+            {
+                chosenClips = defaultSounds;
+            }
 
-        if (chosenClips != null && chosenClips.Length > 0)
-        {
-            PlayRandomSound(chosenClips, audioSource);
-        }
+            if (chosenClips != null && chosenClips.Length > 0)
+            {
+                PlayRandomSound(chosenClips, audioSource);
+            }
 
-        StartVibration(LeftController, 0.15f, 0.15f);
+            StartVibration(LeftController, 0.15f, 0.15f);
+        }
     }
-
     void PlayRandomSound(AudioClip[] audioClips, AudioSource audioSource)
     {
         audioSource.clip = audioClips[Random.Range(0, audioClips.Length)];
