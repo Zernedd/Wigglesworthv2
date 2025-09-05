@@ -1,32 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace GorillaLocomotion
+﻿namespace GorillaLocomotion
 {
     using UnityEngine;
-
-    // A backwards-compatible wrapper for Rigidbody linear velocity
-    public static class RigidBodyExtensions
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetLinearVelocity(this Rigidbody rigidbody)
-        {
-#if UNITY_6000_0_OR_NEWER
-            return rigidbody.linearVelocity;
-#else
-            return rigidbody.velocity;
-#endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetLinearVelocity(this Rigidbody rigidbody, Vector3 value)
-        {
-#if UNITY_6000_0_OR_NEWER
-            rigidbody.linearVelocity = value;
-#else
-            rigidbody.velocity = value;
-#endif
-        }
-    }
 
     public class Player : MonoBehaviour
     {
@@ -125,31 +99,10 @@ namespace GorillaLocomotion
             }
         }
 
-        public void TeleportTo(Vector3 targetPosition)
-        {
-            
-            transform.position = targetPosition;
-
-          
-            if (playerRigidBody != null)
-            {
-                playerRigidBody.velocity = Vector3.zero;
-            }
-
-            
-            lastHeadPosition = headCollider.transform.position;
-            lastLeftHandPosition = CurrentLeftHandPosition();
-            lastRightHandPosition = CurrentRightHandPosition();
-        }
-
-
         private Vector3 PositionWithOffset(Transform transformToModify, Vector3 offsetVector)
         {
             return transformToModify.position + transformToModify.rotation * offsetVector;
         }
-
-        // Prevents us from falling through the floor on frame spikes (ex after first load)
-        private float deltaTime => Mathf.Min(Time.deltaTime, 1f / 20f);
 
         private void Update()
         {
@@ -165,7 +118,7 @@ namespace GorillaLocomotion
 
             //left hand
 
-            Vector3 distanceTraveled = CurrentLeftHandPosition() - lastLeftHandPosition + Vector3.down * 2f * 9.8f * deltaTime * deltaTime;
+            Vector3 distanceTraveled = CurrentLeftHandPosition() - lastLeftHandPosition + Vector3.down * 2f * 9.8f * Time.deltaTime * Time.deltaTime;
 
             if (IterativeCollisionSphereCast(lastLeftHandPosition, minimumRaycastDistance, distanceTraveled, defaultPrecision, out finalPosition, true))
             {
@@ -178,14 +131,14 @@ namespace GorillaLocomotion
                 {
                     firstIterationLeftHand = finalPosition - CurrentLeftHandPosition();
                 }
-                playerRigidBody.SetLinearVelocity(Vector3.zero);
+                playerRigidBody.velocity = Vector3.zero;
 
                 leftHandColliding = true;
             }
 
             //right hand
 
-            distanceTraveled = CurrentRightHandPosition() - lastRightHandPosition + Vector3.down * 2f * 9.8f * deltaTime * deltaTime;
+            distanceTraveled = CurrentRightHandPosition() - lastRightHandPosition + Vector3.down * 2f * 9.8f * Time.deltaTime * Time.deltaTime;
 
             if (IterativeCollisionSphereCast(lastRightHandPosition, minimumRaycastDistance, distanceTraveled, defaultPrecision, out finalPosition, true))
             {
@@ -198,7 +151,7 @@ namespace GorillaLocomotion
                     firstIterationRightHand = finalPosition - CurrentRightHandPosition();
                 }
 
-                playerRigidBody.SetLinearVelocity(Vector3.zero);
+                playerRigidBody.velocity = Vector3.zero;
 
                 rightHandColliding = true;
             }
@@ -221,7 +174,7 @@ namespace GorillaLocomotion
             {
                 rigidBodyMovement = finalPosition - lastHeadPosition;
                 //last check to make sure the head won't phase through geometry
-                if (Physics.Raycast(lastHeadPosition, headCollider.transform.position - lastHeadPosition + rigidBodyMovement, out hitInfo, (headCollider.transform.position - lastHeadPosition + rigidBodyMovement).magnitude + headCollider.radius * defaultPrecision * 0.999f, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(lastHeadPosition, headCollider.transform.position - lastHeadPosition + rigidBodyMovement, out hitInfo, (headCollider.transform.position - lastHeadPosition + rigidBodyMovement).magnitude + headCollider.radius * defaultPrecision * 0.999f, locomotionEnabledLayers.value))
                 {
                     rigidBodyMovement = lastHeadPosition - headCollider.transform.position;
                 }
@@ -270,18 +223,18 @@ namespace GorillaLocomotion
                 {
                     if (denormalizedVelocityAverage.magnitude * jumpMultiplier > maxJumpSpeed)
                     {
-                        playerRigidBody.SetLinearVelocity(denormalizedVelocityAverage.normalized * maxJumpSpeed);
+                        playerRigidBody.velocity = denormalizedVelocityAverage.normalized * maxJumpSpeed;
                     }
                     else
                     {
-                        playerRigidBody.SetLinearVelocity(jumpMultiplier * denormalizedVelocityAverage);
+                        playerRigidBody.velocity = jumpMultiplier * denormalizedVelocityAverage;
                     }
                 }
             }
 
             //check to see if left hand is stuck and we should unstick it
 
-            if (leftHandColliding && (CurrentLeftHandPosition() - lastLeftHandPosition).magnitude > unStickDistance && !Physics.SphereCast(headCollider.transform.position, minimumRaycastDistance * defaultPrecision, CurrentLeftHandPosition() - headCollider.transform.position, out hitInfo, (CurrentLeftHandPosition() - headCollider.transform.position).magnitude - minimumRaycastDistance, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+            if (leftHandColliding && (CurrentLeftHandPosition() - lastLeftHandPosition).magnitude > unStickDistance && !Physics.SphereCast(headCollider.transform.position, minimumRaycastDistance * defaultPrecision, CurrentLeftHandPosition() - headCollider.transform.position, out hitInfo, (CurrentLeftHandPosition() - headCollider.transform.position).magnitude - minimumRaycastDistance, locomotionEnabledLayers.value))
             {
                 lastLeftHandPosition = CurrentLeftHandPosition();
                 leftHandColliding = false;
@@ -289,7 +242,7 @@ namespace GorillaLocomotion
 
             //check to see if right hand is stuck and we should unstick it
 
-            if (rightHandColliding && (CurrentRightHandPosition() - lastRightHandPosition).magnitude > unStickDistance && !Physics.SphereCast(headCollider.transform.position, minimumRaycastDistance * defaultPrecision, CurrentRightHandPosition() - headCollider.transform.position, out hitInfo, (CurrentRightHandPosition() - headCollider.transform.position).magnitude - minimumRaycastDistance, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+            if (rightHandColliding && (CurrentRightHandPosition() - lastRightHandPosition).magnitude > unStickDistance && !Physics.SphereCast(headCollider.transform.position, minimumRaycastDistance * defaultPrecision, CurrentRightHandPosition() - headCollider.transform.position, out hitInfo, (CurrentRightHandPosition() - headCollider.transform.position).magnitude - minimumRaycastDistance, locomotionEnabledLayers.value))
             {
                 lastRightHandPosition = CurrentRightHandPosition();
                 rightHandColliding = false;
@@ -300,6 +253,25 @@ namespace GorillaLocomotion
 
             wasLeftHandTouching = leftHandColliding;
             wasRightHandTouching = rightHandColliding;
+        }
+
+
+
+        public void TeleportTo(Vector3 targetPosition)
+        {
+            // Move the player to the target position
+            transform.position = targetPosition;
+
+            // Reset physics velocity to avoid weird movement after teleport
+            if (playerRigidBody != null)
+            {
+                playerRigidBody.velocity = Vector3.zero;
+            }
+
+            // Update hand/last positions so they don't "snap" weirdly
+            lastHeadPosition = headCollider.transform.position;
+            lastLeftHandPosition = CurrentLeftHandPosition();
+            lastRightHandPosition = CurrentRightHandPosition();
         }
 
         private bool IterativeCollisionSphereCast(Vector3 startPosition, float sphereRadius, Vector3 movementVector, float precision, out Vector3 endPosition, bool singleHand)
@@ -355,19 +327,19 @@ namespace GorillaLocomotion
 
             //initial spherecase
             RaycastHit innerHit;
-            if (Physics.SphereCast(startPosition, sphereRadius * precision, movementVector, out hitInfo, movementVector.magnitude + sphereRadius * (1 - precision), locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(startPosition, sphereRadius * precision, movementVector, out hitInfo, movementVector.magnitude + sphereRadius * (1 - precision), locomotionEnabledLayers.value))
             {
                 //if we hit, we're trying to move to a position a sphereradius distance from the normal
                 finalPosition = hitInfo.point + hitInfo.normal * sphereRadius;
 
                 //check a spherecase from the original position to the intended final position
-                if (Physics.SphereCast(startPosition, sphereRadius * precision * precision, finalPosition - startPosition, out innerHit, (finalPosition - startPosition).magnitude + sphereRadius * (1 - precision * precision), locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+                if (Physics.SphereCast(startPosition, sphereRadius * precision * precision, finalPosition - startPosition, out innerHit, (finalPosition - startPosition).magnitude + sphereRadius * (1 - precision * precision), locomotionEnabledLayers.value))
                 {
                     finalPosition = startPosition + (finalPosition - startPosition).normalized * Mathf.Max(0, hitInfo.distance - sphereRadius * (1f - precision * precision));
                     hitInfo = innerHit;
                 }
                 //bonus raycast check to make sure that something odd didn't happen with the spherecast. helps prevent clipping through geometry
-                else if (Physics.Raycast(startPosition, finalPosition - startPosition, out innerHit, (finalPosition - startPosition).magnitude + sphereRadius * precision * precision * 0.999f, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+                else if (Physics.Raycast(startPosition, finalPosition - startPosition, out innerHit, (finalPosition - startPosition).magnitude + sphereRadius * precision * precision * 0.999f, locomotionEnabledLayers.value))
                 {
                     finalPosition = startPosition;
                     hitInfo = innerHit;
@@ -376,7 +348,7 @@ namespace GorillaLocomotion
                 return true;
             }
             //anti-clipping through geometry check
-            else if (Physics.Raycast(startPosition, movementVector, out hitInfo, movementVector.magnitude + sphereRadius * precision * 0.999f, locomotionEnabledLayers.value, QueryTriggerInteraction.Ignore))
+            else if (Physics.Raycast(startPosition, movementVector, out hitInfo, movementVector.magnitude + sphereRadius * precision * 0.999f, locomotionEnabledLayers.value))
             {
                 finalPosition = startPosition;
                 return true;
@@ -400,36 +372,13 @@ namespace GorillaLocomotion
             }
         }
 
-        // Like Transform.RotateAround but for a point instead of a Transform
-        private static Vector3 RotateAround(Vector3 vector, Quaternion rotation, Vector3 pivot)
+        public void Turn(float degrees)
         {
-            return rotation * (vector - pivot) + pivot;
-        }
-
-        // snapTurn should be false if using smooth turn, otherwise true if using snap turn
-        public void Turn(float degrees, bool snapTurn)
-        {
-            var rotationAxis = transform.up;
-            var rotationPivot = headCollider.transform.position;
-
-            transform.RotateAround(rotationPivot, rotationAxis, degrees);
+            transform.RotateAround(headCollider.transform.position, transform.up, degrees);
             denormalizedVelocityAverage = Quaternion.Euler(0, degrees, 0) * denormalizedVelocityAverage;
             for (int i = 0; i < velocityHistory.Length; i++)
             {
                 velocityHistory[i] = Quaternion.Euler(0, degrees, 0) * velocityHistory[i];
-            }
-
-            // Rotate the cached positions too, otherwise the character can go flying when snap-turning
-            var rotation = Quaternion.AngleAxis(degrees, rotationAxis);
-            lastLeftHandPosition = RotateAround(lastLeftHandPosition, rotation, rotationPivot);
-            lastRightHandPosition = RotateAround(lastRightHandPosition, rotation, rotationPivot);
-            lastPosition = RotateAround(lastPosition, rotation, rotationPivot);
-
-            // If it's a snap turn, unstick ourselves from any surfaces
-            if (snapTurn)
-            {
-                wasLeftHandTouching = false;
-                wasRightHandTouching = false;
             }
         }
 
@@ -437,7 +386,7 @@ namespace GorillaLocomotion
         {
             velocityIndex = (velocityIndex + 1) % velocityHistorySize;
             Vector3 oldestVelocity = velocityHistory[velocityIndex];
-            currentVelocity = (transform.position - lastPosition) / deltaTime;
+            currentVelocity = (transform.position - lastPosition) / Time.deltaTime;
             denormalizedVelocityAverage += (currentVelocity - oldestVelocity) / (float)velocityHistorySize;
             velocityHistory[velocityIndex] = currentVelocity;
             lastPosition = transform.position;

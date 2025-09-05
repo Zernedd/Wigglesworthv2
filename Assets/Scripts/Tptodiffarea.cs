@@ -11,12 +11,14 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
     public GorillaLocomotion.Player player;
     public Rigidbody playerr;
     public Collider col;
-    public string que; 
-
+    public string que;
+    public bool disablemaptoo;
+    public GameObject maptoenable;
+    public GameObject maptodisable;
 
     private bool pendingJoin = false;
     private string nextQueue;
-
+    bool tycoon;
 
     private void Awake()
     {
@@ -36,15 +38,24 @@ public class Tptodiffarea : MonoBehaviourPunCallbacks
     {
         if (other.gameObject.CompareTag("HandTag"))
         {
-         
-                    
-           SuperHeroTycoonMan[] allBases = FindObjectsOfType<SuperHeroTycoonMan>();
 
-                    
-           foreach (SuperHeroTycoonMan baseInstance in allBases)
-           {
-               baseInstance.ResetPads();
-           }
+            if (tycoon)
+            {
+                SuperHeroTycoonMan[] allBases = FindObjectsOfType<SuperHeroTycoonMan>();
+
+
+                foreach (SuperHeroTycoonMan baseInstance in allBases)
+                {
+                    baseInstance.ResetPads();
+                }
+            }
+            maptoenable.SetActive(true);
+
+            if (disablemaptoo) {
+                maptodisable.SetActive(false);
+            }
+
+
             player.TeleportTo(tppoint.gameObject.transform.position);
             player.disableMovement = true;
 
