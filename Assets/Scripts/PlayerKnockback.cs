@@ -11,7 +11,7 @@ public class PlayerKnockback : MonoBehaviourPun
     }
 
     [PunRPC]
-    public void ApplyKnockback(Vector3 force)
+    public void RPC_ApplyKnockback(Vector3 force)
     {
         if (rb != null)
         {

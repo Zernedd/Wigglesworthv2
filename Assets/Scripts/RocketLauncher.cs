@@ -43,15 +43,16 @@ public class RocketLauncher : MonoBehaviourPun
     }
 
     [PunRPC]
-    void RPC_FireRocket(Vector3 spawnPos, Vector3 direction, PhotonMessageInfo info)
+    void RPC_FireRocket(Vector3 spawnPos, Vector3 direction)
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        GameObject rocket = PhotonNetwork.InstantiateRoomObject(rocketPrefab.name, spawnPos, Quaternion.LookRotation(direction));
+        GameObject rocket = PhotonNetwork.InstantiateRoomObject(
+            rocketPrefab.name, spawnPos, Quaternion.LookRotation(direction));
+
         Rigidbody rb = rocket.GetComponent<Rigidbody>();
         if (rb != null)
-        {
             rb.velocity = direction * launchForce;
-        }
     }
+
 }
