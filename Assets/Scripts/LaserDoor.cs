@@ -25,6 +25,8 @@ public class LaserDoor : MonoBehaviour
     [Header("ReZ Wanted Me To Add This")]
     public GameObject DefaultSpawnPoint;
 
+    
+
 
     [Header("DoorStuff")]
     public GameObject Lasers;

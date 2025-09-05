@@ -28,7 +28,7 @@ public class ConBelt : MonoBehaviour
           beltRenderer.material.mainTextureOffset = new Vector2(offset, 0);
         }
 
-        // ?? Cube spawning
+     
         timer += Time.deltaTime;
         if (timer >= spawnInterval)
         {
