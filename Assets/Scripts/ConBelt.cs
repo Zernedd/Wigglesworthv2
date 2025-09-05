@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.ProBuilder.Shapes;
 
 public class ConBelt : MonoBehaviour
 {
+    [Header("Belt Settings")]
+    public float scrollSpeed = 0.5f;   
+    public Renderer beltRenderer;      
 
+    [Header("Cube Settings")]
     public GameObject cubePrefab;
     public Transform spawnPoint;
     public float spawnInterval = 1f;
@@ -18,17 +21,24 @@ public class ConBelt : MonoBehaviour
 
     void Update()
     {
-       
+        
+        if (beltRenderer != null)
+        {
+            float offset = Time.time * scrollSpeed;
+          beltRenderer.material.mainTextureOffset = new Vector2(offset, 0);
+        }
+
+        // ?? Cube spawning
         timer += Time.deltaTime;
         if (timer >= spawnInterval)
         {
             GameObject cube = Instantiate(cubePrefab, spawnPoint.position, Quaternion.identity);
             cubes.Add(cube);
-            Destroy(cube, cubeLifetime); 
+            Destroy(cube, cubeLifetime);
             timer = 0f;
         }
 
-      
+        // ?? Cube movement
         for (int i = cubes.Count - 1; i >= 0; i--)
         {
             GameObject cube = cubes[i];
@@ -46,7 +56,6 @@ public class ConBelt : MonoBehaviour
 
     void OnDisable()
     {
-       
         for (int i = 0; i < cubes.Count; i++)
         {
             if (cubes[i] != null)
@@ -55,5 +64,3 @@ public class ConBelt : MonoBehaviour
         cubes.Clear();
     }
 }
-
-

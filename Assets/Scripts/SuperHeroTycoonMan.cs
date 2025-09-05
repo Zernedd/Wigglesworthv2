@@ -178,7 +178,7 @@ public class SuperHeroTycoonMan : MonoBehaviourPunCallbacks
         if (ownerId == PhotonNetwork.LocalPlayer.ActorNumber)
         {
             walletText.gameObject.SetActive(true);
-            walletText.text = $"Wallet: {GetPlayerBalance(PhotonNetwork.LocalPlayer.ActorNumber)}";
+            walletText.text = $"${GetPlayerBalance(PhotonNetwork.LocalPlayer.ActorNumber)}";
         }
         else
         {
