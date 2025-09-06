@@ -5,7 +5,7 @@ public class Rocket : MonoBehaviourPun
 {
     public string explosionEffectName = "explosion";
     public float explosionRadius = 5f;
-    public float explosionForce = 700f;
+    public float explosionForce = 5f;
     public float upwardsModifier = 1f;
     public float lifeTime = 5f;
 
@@ -14,24 +14,31 @@ public class Rocket : MonoBehaviourPun
         Destroy(gameObject, lifeTime);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    [PunRPC]
+    void RPC_Explode(Vector3 pos)
     {
-        if (!photonView.IsMine) return;
+        // Play particle effect
+        Instantiate(explosionEffect, pos, Quaternion.identity);
 
-        // Spawn explosion particles across network
-        PhotonNetwork.InstantiateRoomObject(explosionEffectName, transform.position, Quaternion.identity);
-
-        // Knockback nearby rigidbodies
-        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
-        foreach (Collider col in colliders)
+        // Knockback
+        Collider[] hits = Physics.OverlapSphere(pos, explosionRadius);
+        foreach (Collider hit in hits)
         {
-            Rigidbody rb = col.attachedRigidbody;
+            Rigidbody rb = hit.attachedRigidbody;
             if (rb != null)
             {
-                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, upwardsModifier, ForceMode.Impulse);
+                rb.AddExplosionForce(explosionForce, pos, explosionRadius, 1f, ForceMode.Impulse);
             }
         }
-
-        PhotonNetwork.Destroy(gameObject);
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (photonView.IsMine) // only owner tells others
+        {
+            photonView.RPC("RPC_Explode", RpcTarget.All, transform.position);
+            PhotonNetwork.Destroy(gameObject);
+        }
+    }
+
 }

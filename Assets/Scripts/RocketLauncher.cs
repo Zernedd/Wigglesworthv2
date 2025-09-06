@@ -33,8 +33,16 @@ public class RocketLauncher : MonoBehaviourPun
             if (triggerValue && !triggerPressed)
             {
                 triggerPressed = true;
-                photonView.RPC("RPC_FireRocket", RpcTarget.MasterClient, firePoint.position, firePoint.forward);
+
+                GameObject rocket = PhotonNetwork.Instantiate(rocketPrefab.name, firePoint.position, Quaternion.LookRotation(firePoint.forward));
+
+                Rigidbody rb = rocket.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.velocity = firePoint.forward * launchForce;
+                }
             }
+
             else if (!triggerValue)
             {
                 triggerPressed = false;
