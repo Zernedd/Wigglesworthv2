@@ -3,7 +3,8 @@ using Photon.Pun;
 
 public class Rocket : MonoBehaviourPun
 {
-    public string explosionEffectName = "explosion";
+    [Header("Explosion Settings")]
+    public GameObject explosionEffect;   // drag your particle prefab here
     public float explosionRadius = 5f;
     public float explosionForce = 5f;
     public float upwardsModifier = 1f;
@@ -18,7 +19,10 @@ public class Rocket : MonoBehaviourPun
     void RPC_Explode(Vector3 pos)
     {
         // Play particle effect
-        Instantiate(explosionEffect, pos, Quaternion.identity);
+        if (explosionEffect != null)
+        {
+            Instantiate(explosionEffect, pos, Quaternion.identity);
+        }
 
         // Knockback
         Collider[] hits = Physics.OverlapSphere(pos, explosionRadius);
@@ -27,7 +31,7 @@ public class Rocket : MonoBehaviourPun
             Rigidbody rb = hit.attachedRigidbody;
             if (rb != null)
             {
-                rb.AddExplosionForce(explosionForce, pos, explosionRadius, 1f, ForceMode.Impulse);
+                rb.AddExplosionForce(explosionForce, pos, explosionRadius, upwardsModifier, ForceMode.Impulse);
             }
         }
     }
@@ -40,5 +44,4 @@ public class Rocket : MonoBehaviourPun
             PhotonNetwork.Destroy(gameObject);
         }
     }
-
 }
