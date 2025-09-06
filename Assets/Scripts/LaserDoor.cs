@@ -32,6 +32,7 @@ public class LaserDoor : MonoBehaviour
     public GameObject Lasers;
     public bool isActive;
     public PhotonView View;
+    public GameObject dorcollideerobj;
 
     private void Awake()
     {
@@ -60,14 +61,15 @@ public class LaserDoor : MonoBehaviour
 
         if (baseman.ownerId != PhotonNetwork.LocalPlayer.ActorNumber)
         {
-           
+            doorCollider.gameObject.layer = LayerMask.NameToLayer("Default");
             doorCollider.isTrigger = false;
             StartCoroutine(DamageAndRespawn());
         }
         else
         {
-            
+            doorCollider.gameObject.layer = LayerMask.NameToLayer("Ignore");
             doorCollider.isTrigger = true;
+
         }
     }
 
